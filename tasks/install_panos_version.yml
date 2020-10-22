@@ -1,0 +1,20 @@
+- name: Download PAN-OS Major version
+  panos_software:
+    provider: '{{ provider }}'
+    version: '{{ major_version }}'
+    install: false
+    restart: false
+
+- name: Install PAN-OS Minor version and Reboot
+  panos_software:
+    provider: '{{ provider }}'
+    version: '{{ code_revisions.get(major_version) }}'
+    install: true
+    restart: true
+
+- name: Notify Reboot Handler
+  command: echo "Waiting for Device Reboot"
+  notify: "reboot"
+
+- name: Wait for Online Handler
+  meta: flush_handlers
