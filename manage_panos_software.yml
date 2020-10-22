@@ -1,0 +1,102 @@
+- hosts: all
+  connection: local
+  gather_facts: false
+
+  vars:
+    auth_code: 'your valid VM Auth-Code if unlicensed'
+
+    provider:
+      ip_address: '{{ ip_address }}'
+      username: '{{ username }}'
+      password: '{{ password }}'
+
+  collections:
+    - paloaltonetworks.panos
+
+  tasks:
+    - name: Include User Variables
+      include_vars: vars/main.yml
+
+    - name: Wait for Device Online
+      # Best practice is to always wait for device online at start of playbook
+      # as these tasks will get called repeatedly, they are added as handlers that
+      # get included
+      command: echo "Waiting for device online"
+      notify: "reboot"
+
+    - name: Wait for Online Handler
+      meta: flush_handlers
+
+    - name: Setup Code Revisions Major List
+      set_fact:
+        major_versions: '{{ code_revisions.keys() | list }}'
+
+    - name: Set Desired Major Release
+      set_fact:
+        desired_major: "{{ major_versions | select('version', desired_version, '<') | last }}"
+        current_major: "{{ major_versions | select('version', sw_version, '<') | last }}"
+
+    - name: Set Desired Minor Version
+      # code_revisions contains a dict of major versions with the latest minor versions
+      # in most cases, we want to install the latest minor release. However, the user
+      # may specify any minor release they want, so capture that here
+      set_fact:
+        code_revisions: "{{ code_revisions | combine({desired_major: desired_version}) }}"
+
+    - name: Setup Possible Upgrade Paths
+      set_fact:
+        upgrade_path: "{{ major_versions | select('version', current_major, '>') }}"
+
+    - name: Setup Possible Downgrade Paths
+      set_fact:
+        downgrade_path: "{{ major_versions | select('version', current_major, '<') }}"
+
+    - name: Create Downgrade Plan
+      set_fact:
+        version_sequence: "{{ downgrade_path | select('version', desired_major, '>=') | reverse }}"
+      when: current_major is version(desired_major, '>')
+
+    - name: Create Upgrade Plan
+      set_fact:
+        version_sequence: "{{ upgrade_path | select('version', desired_major, '>=') }}"
+      when: current_major is version(desired_major, '<')
+
+    - name: Set Minor Upgrade Plan
+      set_fact:
+        version_sequence: "{{ [current_major] }}"
+      when: current_major == desired_major
+
+    - name: debug version_sequence
+      debug: msg="VS is {{ version_sequence }}"
+
+    - name: Kicking off Upgrade / Downgrade Plan
+      include_tasks: tasks/install_panos_version.yml
+      loop: '{{ version_sequence }}'
+      loop_control:
+        loop_var: major_version
+
+
+  handlers:
+    - name: Wait for System Information
+      panos_op:
+        provider: '{{ provider }}'
+        cmd: 'show system info'
+      register: system_info
+      until: system_info is not failed
+      retries: 30
+      delay: 60
+      listen: reboot
+
+    - name: Update System Info
+      set_fact:
+        system_info_json: "{{ system_info.stdout | from_json }}"
+      listen: reboot
+
+    - name: Update Software Version
+      set_fact:
+        sw_version: "{{ system_info_json.response.result.system['sw-version'] }}"
+      listen: reboot
+
+    - debug:
+        msg: "Current software version is: {{ sw_version }}"
+      listen: reboot

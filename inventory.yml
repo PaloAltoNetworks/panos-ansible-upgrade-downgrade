@@ -1,0 +1,3 @@
+[localhost]
+# ensure we use a virtualenv if one is present
+localhost ansible_python_interpreter=python
