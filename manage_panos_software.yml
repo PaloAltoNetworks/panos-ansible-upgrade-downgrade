@@ -69,6 +69,26 @@
     - name: debug version_sequence
       debug: msg="VS is {{ version_sequence }}"
 
+    - name: Activate my authcode
+      # This firewall must be licensed to pull dynamic content and software updates
+      panos_lic:
+        provider: '{{ provider }}'
+        auth_code: '{{ auth_code }}'
+      register: activate_authcode
+
+    - name: Pause for Service Restart
+      pause:
+        seconds: 180
+      when: activate_authcode.changed
+      notify: "reboot"
+
+    - name: Wait for Service Restart Handler
+      meta: flush_handlers
+
+    - name: Install latest Dynamic Updates
+      include_tasks: tasks/content_updates.yml
+      when: update_content == yes
+
     - name: Kicking off Upgrade / Downgrade Plan
       include_tasks: tasks/install_panos_version.yml
       loop: '{{ version_sequence }}'
