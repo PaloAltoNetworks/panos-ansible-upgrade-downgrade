@@ -17,6 +17,16 @@
     - name: Include User Variables
       include_vars: vars/main.yml
 
+    - name: Ensure deps are avabilable
+      # Ensure we have all the right requirements installed in this environment
+      pip:
+        name:
+          - pan-python
+          - pandevice
+          - xmltodict
+          - requests
+          - requests_toolbelt
+
     - name: Wait for Device Online
       # Best practice is to always wait for device online at start of playbook
       # as these tasks will get called repeatedly, they are added as handlers that
@@ -87,7 +97,7 @@
 
     - name: Install latest Dynamic Updates
       include_tasks: tasks/content_updates.yml
-      when: update_content == yes
+      when: update_content == 'yes'
 
     - name: Kicking off Upgrade / Downgrade Plan
       include_tasks: tasks/install_panos_version.yml
