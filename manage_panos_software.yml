@@ -68,7 +68,7 @@
 
     - name: Create Upgrade Plan
       set_fact:
-        version_sequence: "{{ upgrade_path | select('version', desired_major, '>=') }}"
+        version_sequence: "{{ upgrade_path | select('version', desired_major, '<=') }}"
       when: current_major is version(desired_major, '<')
 
     - name: Set Minor Upgrade Plan
