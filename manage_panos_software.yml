@@ -43,8 +43,8 @@
 
     - name: Set Desired Major Release
       set_fact:
-        desired_major: "{{ major_versions | select('version', desired_version, '<') | last }}"
-        current_major: "{{ major_versions | select('version', sw_version, '<') | last }}"
+        desired_major: "{{ major_versions | select('version', desired_version, '<') | list | last }}"
+        current_major: "{{ major_versions | select('version', sw_version, '<') | list | last }}"
 
     - name: Set Desired Minor Version
       # code_revisions contains a dict of major versions with the latest minor versions
@@ -63,7 +63,7 @@
 
     - name: Create Downgrade Plan
       set_fact:
-        version_sequence: "{{ downgrade_path | select('version', desired_major, '>=') | reverse }}"
+        version_sequence: "{{ downgrade_path | select('version', desired_major, '>=') | list | reverse }}"
       when: current_major is version(desired_major, '>')
 
     - name: Create Upgrade Plan
