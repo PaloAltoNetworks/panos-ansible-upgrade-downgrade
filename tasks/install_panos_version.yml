@@ -13,7 +13,8 @@
     restart: true
 
 - name: Notify Reboot Handler
-  command: echo "Waiting for Device Reboot"
+  pause:
+    seconds: 120
   notify: "reboot"
 
 - name: Wait for Online Handler
