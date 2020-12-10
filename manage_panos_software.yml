@@ -37,6 +37,14 @@
     - name: Wait for Online Handler
       meta: flush_handlers
 
+    - block:
+        - name: "Checking if we should bail out early"
+          debug:
+            msg: "Device is already in the desired state"
+
+        - meta: end_play
+      when: sw_version == desired_version
+
     - name: Setup Code Revisions Major List
       set_fact:
         major_versions: '{{ code_revisions.keys() | list }}'
