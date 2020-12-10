@@ -13,9 +13,9 @@
     restart: true
 
 - name: Notify Reboot Handler
-  pause:
-    seconds: 120
+  command: echo "Wait for Device Reboot"
   notify: "reboot"
+  delay: 60
 
 - name: Wait for Online Handler
   meta: flush_handlers
