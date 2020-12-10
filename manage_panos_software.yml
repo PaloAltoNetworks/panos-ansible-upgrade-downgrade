@@ -55,11 +55,11 @@
 
     - name: Setup Possible Upgrade Paths
       set_fact:
-        upgrade_path: "{{ major_versions | select('version', current_major, '>') }}"
+        upgrade_path: "{{ major_versions | select('version', current_major, '>') | list }}"
 
     - name: Setup Possible Downgrade Paths
       set_fact:
-        downgrade_path: "{{ major_versions | select('version', current_major, '<') }}"
+        downgrade_path: "{{ major_versions | select('version', current_major, '<') | list }}"
 
     - name: Create Downgrade Plan
       set_fact:
@@ -68,7 +68,7 @@
 
     - name: Create Upgrade Plan
       set_fact:
-        version_sequence: "{{ upgrade_path | select('version', desired_major, '<=') }}"
+        version_sequence: "{{ upgrade_path | select('version', desired_major, '<=') | list }}"
       when: current_major is version(desired_major, '<')
 
     - name: Set Minor Upgrade Plan
