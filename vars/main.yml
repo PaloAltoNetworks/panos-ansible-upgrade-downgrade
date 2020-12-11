@@ -7,9 +7,9 @@ password: 'Sup er_Sec ret'
 auth_code: IBADCODE
 
 # desired software version
-desired_version: 10.0.1
+desired_version: 9.1.0
 
-update_content: 'no'
+update_content: 'yes'
 
 # Versions
 # Updated 10-20-20 - You Should periodically update these from what is available and recommended
