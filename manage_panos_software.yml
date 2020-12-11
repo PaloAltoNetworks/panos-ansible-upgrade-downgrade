@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 0.2
+    pb_version: 0.3
 
   collections:
     - paloaltonetworks.panos
