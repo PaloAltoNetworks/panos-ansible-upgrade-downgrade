@@ -10,12 +10,18 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
+    pb_version: 0.1
+
   collections:
     - paloaltonetworks.panos
 
   tasks:
     - name: Include User Variables
       include_vars: vars/main.yml
+
+    - name: "Initiating Upgrade / Downgrade Tool"
+      debug:
+        msg: "Initiating Upgrade / Downgrade Tool Version: {{ pb_version }}"
 
     - name: Ensure deps are avabilable
       # Ensure we have all the right requirements installed in this environment
@@ -36,6 +42,10 @@
 
     - name: Wait for Online Handler
       meta: flush_handlers
+
+    - name: "Debug Parameters"
+      debug:
+        msg: "Upgrade / Downgrade called with parameters: {{ sw_version }} -> {{ desired_version }}"
 
     - block:
         - name: "Checking if we should bail out early"
@@ -105,7 +115,7 @@
 
     - name: Install latest Dynamic Updates
       include_tasks: tasks/content_updates.yml
-      when: update_content == 'yes'
+      when: ( update_content == 'yes' and (desired_major != current_major))
 
     - name: Kicking off Upgrade / Downgrade Plan
       include_tasks: tasks/install_panos_version.yml
