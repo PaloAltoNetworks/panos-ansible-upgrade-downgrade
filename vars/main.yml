@@ -15,6 +15,9 @@ update_content: 'yes'
 # force the content_update to always happen
 force_update_content: 'no'
 
+# should attempt anti-virus update
+update_av: 'no'
+
 # Versions
 # Updated 10-20-20 - You Should periodically update these from what is available and recommended
 code_revisions:

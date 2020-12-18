@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 0.3
+    pb_version: 0.4
 
   collections:
     - paloaltonetworks.panos
@@ -119,6 +119,10 @@
         ( force_update_content == 'yes' ) or
         ( update_content == 'yes' and (desired_major != current_major))
         )
+
+    - name: Install latest Anti-Virus Updates
+      include_tasks: tasks/antivirus_updates.yml
+      when: update_av == 'yes'
 
     - name: Kicking off Upgrade / Downgrade Plan
       include_tasks: tasks/install_panos_version.yml
