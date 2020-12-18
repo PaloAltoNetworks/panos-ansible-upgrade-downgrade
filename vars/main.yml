@@ -9,7 +9,11 @@ auth_code: IBADCODE
 # desired software version
 desired_version: 9.1.0
 
+# should attempt content update
+# note this will not happen when desired_major == current_major versions
 update_content: 'yes'
+# force the content_update to always happen
+force_update_content: 'no'
 
 # Versions
 # Updated 10-20-20 - You Should periodically update these from what is available and recommended
