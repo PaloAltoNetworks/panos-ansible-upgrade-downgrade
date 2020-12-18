@@ -1,13 +1,13 @@
 - name: Check latest content
   # Get an updated dynamic content list
-  panos_op:
+  paloaltonetworks.panos.panos_op:
     provider: '{{ provider }}'
     cmd: 'request content upgrade check'
   register: check
 
 - name: Download latest content
   # Download the latest version
-  panos_op:
+  paloaltonetworks.panos.panos_op:
     provider: '{{ provider }}'
     cmd: |
       <request><content><upgrade><download>
@@ -18,7 +18,7 @@
 
 - name: Check content download result
   # wait for this job to finish
-  panos_op:
+  paloaltonetworks.panos.panos_op:
     provider: '{{ provider }}'
     cmd: 'show jobs id {{ (download.stdout | from_json).response.result.job }}'
   register: download_job
@@ -28,7 +28,7 @@
 
 - name: Install latest content
   # Content is downloaded and ready, now install it
-  panos_op:
+  paloaltonetworks.panos.panos_op:
     provider: '{{ provider }}'
     cmd: |
       <request><content><upgrade><install>
@@ -39,7 +39,7 @@
 
 - name: Check content install result
   # again, wait for job to complete
-  panos_op:
+  paloaltonetworks.panos.panos_op:
     provider: '{{ provider }}'
     cmd: 'show jobs id {{ (install.stdout | from_json).response.result.job }}'
   register: install_job

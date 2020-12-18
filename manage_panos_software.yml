@@ -115,7 +115,10 @@
 
     - name: Install latest Dynamic Updates
       include_tasks: tasks/content_updates.yml
-      when: ( update_content == 'yes' and (desired_major != current_major))
+      when: (
+        ( force_update_content == 'yes' ) or
+        ( update_content == 'yes' and (desired_major != current_major))
+        )
 
     - name: Kicking off Upgrade / Downgrade Plan
       include_tasks: tasks/install_panos_version.yml

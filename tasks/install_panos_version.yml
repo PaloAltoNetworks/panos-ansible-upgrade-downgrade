@@ -1,5 +1,5 @@
 - name: Download PAN-OS Major version
-  panos_software:
+  paloaltonetworks.panos.panos_software:
     provider: '{{ provider }}'
     version: '{{ major_version }}'
     install: false
@@ -7,7 +7,7 @@
   when: current_major != major_version
 
 - name: Install PAN-OS Minor version and Reboot
-  panos_software:
+  paloaltonetworks.panos.panos_software:
     provider: '{{ provider }}'
     version: '{{ code_revisions.get(major_version) }}'
     install: true
