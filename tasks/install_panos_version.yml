@@ -12,14 +12,17 @@
     version: '{{ code_revisions.get(major_version) }}'
     install: true
     restart: true
+  register: install_result
 
 - name: Notify Reboot Handler
   command: echo "Wait for Device Reboot"
   notify: "reboot"
+  when: install_result.changed
 
 - name: Pause for Restart Checks
   pause:
     seconds: 30
+  when: install_result.changed
 
 - name: Wait for Online Handler
   meta: flush_handlers
