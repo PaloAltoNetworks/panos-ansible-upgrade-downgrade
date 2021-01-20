@@ -97,18 +97,26 @@
     - name: debug version_sequence
       debug: msg="VS is {{ version_sequence }}"
 
-    - name: Activate my authcode
-      # This firewall must be licensed to pull dynamic content and software updates
-      panos_lic:
-        provider: '{{ provider }}'
-        auth_code: '{{ auth_code }}'
-      register: activate_authcode
+    - block:
+        - name: Activate my authcode
+          # This firewall must be licensed to pull dynamic content and software updates
+          panos_lic:
+            provider: '{{ provider }}'
+            auth_code: '{{ auth_code }}'
+          register: activate_authcode
 
-    - name: Pause for Service Restart
-      pause:
-        seconds: 180
-      when: activate_authcode.changed
-      notify: "reboot"
+        - name: Pause for Service Restart
+          pause:
+            seconds: 180
+          when: activate_authcode.changed
+          notify: "reboot"
+
+      rescue:
+        - name: Pause for Service Restart (Rescue)
+          pause:
+            seconds: 180
+          notify: "reboot"
+
 
     - name: Wait for Service Restart Handler
       meta: flush_handlers
