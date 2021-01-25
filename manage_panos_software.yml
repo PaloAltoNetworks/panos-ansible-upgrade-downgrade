@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 0.7
+    pb_version: 0.8
 
   collections:
     - paloaltonetworks.panos
@@ -117,7 +117,6 @@
             seconds: 180
           notify: "reboot"
 
-
     - name: Wait for Service Restart Handler
       meta: flush_handlers
 
@@ -138,9 +137,15 @@
       loop_control:
         loop_var: major_version
 
-#     removed per pnyguen as this is probably not needed
-#    - name: Perform Final Commit
-#      include_tasks: tasks/perform_commit.yml
+    - name: Wait for final auto-commit
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ provider }}'
+        cmd: 'show jobs id 1'
+      register: auto_com_job
+      until: |
+        auto_com_job is not failed and (auto_com_job.stdout | from_json).response.result.job.status == 'FIN'
+      retries: 30
+      delay: 60
 
   handlers:
     - name: Wait for System Information
