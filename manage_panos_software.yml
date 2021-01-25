@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 0.6
+    pb_version: 0.7
 
   collections:
     - paloaltonetworks.panos
@@ -138,8 +138,9 @@
       loop_control:
         loop_var: major_version
 
-    - name: Perform Final Commit
-      include_tasks: tasks/perform_commit.yml
+#     removed per pnyguen as this is probably not needed
+#    - name: Perform Final Commit
+#      include_tasks: tasks/perform_commit.yml
 
   handlers:
     - name: Wait for System Information
