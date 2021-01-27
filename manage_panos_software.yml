@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 0.8
+    pb_version: 0.9
 
   collections:
     - paloaltonetworks.panos
@@ -140,10 +140,12 @@
     - name: Wait for final auto-commit
       paloaltonetworks.panos.panos_op:
         provider: '{{ provider }}'
-        cmd: 'show jobs id 1'
-      register: auto_com_job
+        cmd: 'show jobs all'
+      register: all_jobs
       until: |
-        auto_com_job is not failed and (auto_com_job.stdout | from_json).response.result.job.status == 'FIN'
+        all_jobs is not failed
+        and (all_jobs.stdout | from_json | json_query("response.result.job[]") | default([], true) | length > 0)
+        and (all_jobs.stdout | from_json | json_query("response.result.job[?status != 'FIN']") | length == 0)
       retries: 30
       delay: 60
 
