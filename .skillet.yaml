@@ -36,33 +36,33 @@ variables:
 
   - name: update_content
     description: Update Dynamic Content
-    default: yes
+    default: "yes"
     type_hint: dropdown
     dd_list:
-      - key: yes
-        value: yes
-      - key: no
-        value: no
+      - key: "yes"
+        value: "yes"
+      - key: "no"
+        value: "no"
 
   - name: force_update_content
     description: Force Dynamic Content Update
-    default: yes
+    default: "yes"
     type_hint: dropdown
     dd_list:
-      - key: yes
-        value: yes
-      - key: no
-        value: no
+      - key: "yes"
+        value: "yes"
+      - key: "no"
+        value: "no"
 
   - name: update_av
     description: Update Dynamic Anti-Virus
-    default: yes
+    default: "yes"
     type_hint: dropdown
     dd_list:
-      - key: yes
-        value: yes
-      - key: no
-        value: no
+      - key: "yes"
+        value: "yes"
+      - key: "no"
+        value: "no"
 
 snippets:
   - name: ansible_test
