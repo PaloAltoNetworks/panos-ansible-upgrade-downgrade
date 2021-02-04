@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 0.9
+    pb_version: 1.0
 
   collections:
     - paloaltonetworks.panos
@@ -112,10 +112,16 @@
           notify: "reboot"
 
       rescue:
-        - name: Pause for Service Restart (Rescue)
+        - name: Alert User on license Success
+          debug: msg="Successful license operation often results in an exception. This is expected behaviour."
+
+        - name: Notify Reboot Handler
+          command: echo "Wait for Process Restart"
+          notify: "reboot"
+
+        - name: Pause for Restart Checks
           pause:
             seconds: 180
-          notify: "reboot"
 
     - name: Wait for Service Restart Handler
       meta: flush_handlers
