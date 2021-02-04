@@ -11,6 +11,6 @@
     cmd: 'show jobs id {{ commit.jobid }}'
   register: commit_job
   until: commit_job is not failed and (commit_job.stdout | from_json).response.result.job.status == 'FIN'
-  retries: 10
-  delay: 60
+  retries: 20
+  delay: 30
 

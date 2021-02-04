@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 1.0
+    pb_version: 1.1
 
   collections:
     - paloaltonetworks.panos
@@ -107,7 +107,7 @@
 
         - name: Pause for Service Restart
           pause:
-            seconds: 180
+            seconds: 120
           when: activate_authcode.changed
           notify: "reboot"
 
@@ -121,7 +121,7 @@
 
         - name: Pause for Restart Checks
           pause:
-            seconds: 180
+            seconds: 120
 
     - name: Wait for Service Restart Handler
       meta: flush_handlers
@@ -152,8 +152,8 @@
         all_jobs is not failed
         and (all_jobs.stdout | from_json | json_query("response.result.job[]") | default([], true) | length > 0)
         and (all_jobs.stdout | from_json | json_query("response.result.job[?status != 'FIN']") | length == 0)
-      retries: 30
-      delay: 60
+      retries: 60
+      delay: 30
 
   handlers:
     - name: Wait for System Information
@@ -162,8 +162,8 @@
         cmd: 'show system info'
       register: system_info
       until: system_info is not failed
-      retries: 30
-      delay: 60
+      retries: 60
+      delay: 30
       listen: reboot
 
     - name: Update System Info
