@@ -113,7 +113,7 @@
 
       rescue:
         - name: Alert User on license Success
-          debug: msg="Successful license operation often results in an exception. This is expected behaviour."
+          debug: msg="Successful license operation often results in an exception. This is expected behavior."
 
         - name: Notify Reboot Handler
           command: echo "Wait for Process Restart"
