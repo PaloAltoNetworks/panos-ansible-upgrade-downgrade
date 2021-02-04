@@ -23,8 +23,8 @@
     cmd: 'show jobs id {{ (download.stdout | from_json).response.result.job }}'
   register: download_job
   until: download_job is not failed and (download_job.stdout | from_json).response.result.job.status == 'FIN'
-  retries: 10
-  delay: 60
+  retries: 20
+  delay: 30
 
 - name: Install latest anti-virus
   # Content is downloaded and ready, now install it
@@ -44,5 +44,5 @@
     cmd: 'show jobs id {{ (av_install.stdout | from_json).response.result.job }}'
   register: av_install_job
   until: av_install_job is not failed and (av_install_job.stdout | from_json).response.result.job.status == 'FIN'
-  retries: 10
-  delay: 60
+  retries: 20
+  delay: 30
