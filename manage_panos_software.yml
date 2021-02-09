@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 1.1
+    pb_version: 1.2
 
   collections:
     - paloaltonetworks.panos
@@ -150,8 +150,9 @@
       register: all_jobs
       until: |
         all_jobs is not failed
-        and (all_jobs.stdout | from_json | json_query("response.result.job[]") | default([], true) | length > 0)
-        and (all_jobs.stdout | from_json | json_query("response.result.job[?status != 'FIN']") | length == 0)
+        and (all_jobs.stdout | from_json | json_query("response.result.job|[@][]") | default([], true) | length > 0)
+        and (all_jobs.stdout | from_json | json_query("response.result.job|[@][]")
+        | json_query("[?status != 'FIN']") | length == 0)
       retries: 60
       delay: 30
 
