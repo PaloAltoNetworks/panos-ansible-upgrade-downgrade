@@ -1,5 +1,5 @@
 name: panos_ansible_upgrade_downgrade
-label: PAN-OS Upgrade / Downgrabe
+label: PAN-OS Upgrade / Downgrade
 description: |
   Playbook to dynamically upgrade / downgrade a PAN-OS to the desired version.
 
