@@ -1,0 +1,28 @@
+# PAN-OS Auth Information
+ip_address: 10.10.10.10
+username: admin
+password: 'Sup er_Sec ret'
+
+# Set your authcode here to ensure the FW is properly licensed before attempting content updates
+auth_code: IBADCODE
+
+# desired software version
+desired_version: 9.1.7
+
+# should attempt content update
+# note this will not happen when desired_major == current_major versions
+update_content: 'yes'
+# force the content_update to always happen
+force_update_content: 'no'
+
+# should attempt anti-virus update
+update_av: 'no'
+
+# Versions
+# Updated 10-20-20 - You Should periodically update these from what is available and recommended
+code_revisions:
+  '8.0.0': 8.0.20
+  '8.1.0': 8.1.17
+  '9.0.0': 9.0.12
+  '9.1.0': 9.1.7
+  '10.0.0': 10.0.3

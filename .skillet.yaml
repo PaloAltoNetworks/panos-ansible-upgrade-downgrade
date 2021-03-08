@@ -1,0 +1,82 @@
+name: panos_ansible_upgrade_downgrade
+label: PAN-OS Upgrade / Downgrade
+description: |
+  Playbook to dynamically upgrade / downgrade a PAN-OS to the desired version.
+
+type: docker
+
+labels:
+  collection: Deploy Tools
+
+variables:
+  - name: ip_address
+    description: Host IP Address
+    default: 10.10.10.10
+    type_hint: ip_address
+
+  - name: username
+    description: Host Username
+    default: admin
+    type_hint: text
+
+  - name: password
+    description: Host Password
+    default: admin
+    type_hint: password
+
+  - name: desired_version
+    description: Desired PAN-OS Version
+    default: 10.0.3
+    type_hint: text
+
+  - name: auth_code
+    description: Auth Code
+    default: SOMECODEHERE
+    type_hint: text
+
+  - name: update_content
+    description: Update Dynamic Content
+    default: "yes"
+    type_hint: dropdown
+    dd_list:
+      - key: "yes"
+        value: "yes"
+      - key: "no"
+        value: "no"
+
+  - name: force_update_content
+    description: Force Dynamic Content Update
+    default: "yes"
+    type_hint: dropdown
+    dd_list:
+      - key: "yes"
+        value: "yes"
+      - key: "no"
+        value: "no"
+
+  - name: update_av
+    description: Update Dynamic Anti-Virus
+    default: "yes"
+    type_hint: dropdown
+    dd_list:
+      - key: "yes"
+        value: "yes"
+      - key: "no"
+        value: "no"
+
+snippets:
+  - name: ansible_test
+    image: registry.gitlab.com/panw-gse/as/panos_skillet_tools:dev
+    async: True
+    cmd: |
+      ansible-playbook -i 'panos,' manage_panos_software.yml
+      -e 'auth_code="{{ auth_code }}"'
+      -e 'desired_version="{{ desired_version }}"'
+      -e 'update_content="{{ update_content }}"'
+      -e 'force_update_content="{{ force_update_content }}"'
+      -e 'update_av="{{ update_av }}"'
+      -e '{"provider": {
+        "ip_address": "{{ ip_address }}",
+        "username": "{{ username }}",
+        "password":  "{{ password | quote }}"
+      } }'
