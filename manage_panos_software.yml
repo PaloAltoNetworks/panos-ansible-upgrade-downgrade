@@ -1,0 +1,182 @@
+- hosts: all
+  connection: local
+  gather_facts: false
+
+  vars:
+    auth_code: 'your valid VM Auth-Code if unlicensed'
+
+    provider:
+      ip_address: '{{ ip_address }}'
+      username: '{{ username }}'
+      password: '{{ password }}'
+
+    pb_version: 1.2
+
+  collections:
+    - paloaltonetworks.panos
+
+  tasks:
+    - name: Include User Variables
+      include_vars: vars/main.yml
+
+    - name: "Initiating Upgrade / Downgrade Tool"
+      debug:
+        msg: "Initiating Upgrade / Downgrade Tool Version: {{ pb_version }}"
+
+    - name: Ensure deps are avabilable
+      # Ensure we have all the right requirements installed in this environment
+      pip:
+        name:
+          - pan-python
+          - pan-os-python>1.0.0
+          - xmltodict
+          - requests
+          - requests_toolbelt
+
+    - name: Wait for Device Online
+      # Best practice is to always wait for device online at start of playbook
+      # as these tasks will get called repeatedly, they are added as handlers that
+      # get included
+      command: echo "Waiting for device online"
+      notify: "reboot"
+
+    - name: Wait for Online Handler
+      meta: flush_handlers
+
+    - name: "Debug Parameters"
+      debug:
+        msg: "Upgrade / Downgrade called with parameters: {{ sw_version }} -> {{ desired_version }}"
+
+    - block:
+        - name: "Checking if we should bail out early"
+          debug:
+            msg: "Device is already in the desired state"
+
+        - meta: end_play
+      when: (sw_version == desired_version) and (force_update_content != 'yes')
+
+    - name: Setup Code Revisions Major List
+      set_fact:
+        major_versions: '{{ code_revisions.keys() | list }}'
+
+    - name: Set Desired Major Release
+      set_fact:
+        desired_major: "{{ major_versions | select('version', desired_version, '<=') | list | last }}"
+        current_major: "{{ major_versions | select('version', sw_version, '<=') | list | last }}"
+
+    - name: Set Desired Minor Version
+      # code_revisions contains a dict of major versions with the latest minor versions
+      # in most cases, we want to install the latest minor release. However, the user
+      # may specify any minor release they want, so capture that here
+      set_fact:
+        code_revisions: "{{ code_revisions | combine({desired_major: desired_version}) }}"
+
+    - name: Setup Possible Upgrade Paths
+      set_fact:
+        upgrade_path: "{{ major_versions | select('version', current_major, '>') | list }}"
+
+    - name: Setup Possible Downgrade Paths
+      set_fact:
+        downgrade_path: "{{ major_versions | select('version', current_major, '<') | list }}"
+
+    - name: Create Downgrade Plan
+      set_fact:
+        version_sequence: "{{ downgrade_path | select('version', desired_major, '>=') | reverse | list }}"
+      when: current_major is version(desired_major, '>')
+
+    - name: Create Upgrade Plan
+      set_fact:
+        version_sequence: "{{ upgrade_path | select('version', desired_major, '<=') | list }}"
+      when: current_major is version(desired_major, '<')
+
+    - name: Set Minor Upgrade Plan
+      set_fact:
+        version_sequence: "{{ [current_major] }}"
+      when: current_major == desired_major
+
+    - name: debug version_sequence
+      debug: msg="VS is {{ version_sequence }}"
+
+    - block:
+        - name: Activate my authcode
+          # This firewall must be licensed to pull dynamic content and software updates
+          panos_lic:
+            provider: '{{ provider }}'
+            auth_code: '{{ auth_code }}'
+          register: activate_authcode
+
+        - name: Pause for Service Restart
+          pause:
+            seconds: 120
+          when: activate_authcode.changed
+          notify: "reboot"
+
+      rescue:
+        - name: Alert User on license Success
+          debug: msg="Successful license operation often results in an exception. This is expected behavior."
+
+        - name: Notify Reboot Handler
+          command: echo "Wait for Process Restart"
+          notify: "reboot"
+
+        - name: Pause for Restart Checks
+          pause:
+            seconds: 120
+
+    - name: Wait for Service Restart Handler
+      meta: flush_handlers
+
+    - name: Install latest Dynamic Updates
+      include_tasks: tasks/content_updates.yml
+      when: (
+        ( force_update_content == 'yes' ) or
+        ( update_content == 'yes' and (desired_major != current_major))
+        )
+
+    - name: Install latest Anti-Virus Updates
+      include_tasks: tasks/antivirus_updates.yml
+      when: update_av == 'yes'
+
+    - name: Kicking off Upgrade / Downgrade Plan
+      include_tasks: tasks/install_panos_version.yml
+      loop: '{{ version_sequence }}'
+      loop_control:
+        loop_var: major_version
+
+    - name: Wait for final auto-commit
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ provider }}'
+        cmd: 'show jobs all'
+      register: all_jobs
+      until: |
+        all_jobs is not failed
+        and (all_jobs.stdout | from_json | json_query("response.result.job|[@][]") | default([], true) | length > 0)
+        and (all_jobs.stdout | from_json | json_query("response.result.job|[@][]")
+        | json_query("[?status != 'FIN']") | length == 0)
+      retries: 60
+      delay: 30
+
+  handlers:
+    - name: Wait for System Information
+      panos_op:
+        provider: '{{ provider }}'
+        cmd: 'show system info'
+      register: system_info
+      until: system_info is not failed
+      retries: 60
+      delay: 30
+      listen: reboot
+
+    - name: Update System Info
+      set_fact:
+        system_info_json: "{{ system_info.stdout | from_json }}"
+      listen: reboot
+
+    - name: Update Software Version
+      set_fact:
+        sw_version: "{{ system_info_json.response.result.system['sw-version'] }}"
+      listen: reboot
+
+    - debug:
+        msg: "Current software version is: {{ sw_version }}"
+      listen: reboot

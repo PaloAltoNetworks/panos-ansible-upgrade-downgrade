@@ -1,0 +1,16 @@
+- name: Perform Commit
+  paloaltonetworks.panos.panos_commit_firewall:
+    provider: '{{ provider }}'
+    force: true
+  register: commit
+
+- name: Check Commit Result
+  # wait for commit to finish
+  paloaltonetworks.panos.panos_op:
+    provider: '{{ provider }}'
+    cmd: 'show jobs id {{ commit.jobid }}'
+  register: commit_job
+  until: commit_job is not failed and (commit_job.stdout | from_json).response.result.job.status == 'FIN'
+  retries: 20
+  delay: 30
+
