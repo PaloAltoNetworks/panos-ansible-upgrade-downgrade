@@ -66,7 +66,7 @@ variables:
 
 snippets:
   - name: ansible_test
-    image: registry.gitlab.com/panw-gse/as/panos_skillet_tools:dev
+    image: registry.gitlab.com/panw-gse/as/panos_skillet_tools:latest 
     async: True
     cmd: |
       ansible-playbook -i 'panos,' manage_panos_software.yml
