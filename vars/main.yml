@@ -7,7 +7,7 @@ password: 'Sup er_Sec ret'
 auth_code: IBADCODE
 
 # desired software version
-desired_version: 9.1.7
+desired_version: 9.1.8
 
 # should attempt content update
 # note this will not happen when desired_major == current_major versions
@@ -20,10 +20,11 @@ update_av: 'no'
 
 # Versions
 # Updated 10-20-20 - You Should periodically update these from what is available and recommended
+# Updated 06-04-21 - Updated for 10.1.0 and update minor revs across the board
 code_revisions:
   '8.0.0': 8.0.20
-  '8.1.0': 8.1.17
-  '9.0.0': 9.0.12
-  '9.1.0': 9.1.7
-  '10.0.0': 10.0.3
+  '8.1.0': 8.1.19
+  '9.0.0': 9.0.13
+  '9.1.0': 9.1.8
+  '10.0.0': 10.0.6
   '10.1.0': 10.1.0
