@@ -1,0 +1,37 @@
+name: panos_ansible_content_update
+label: PAN-OS Content Update
+description: |
+  Playbook to dynamically update the AV and Content on a NGFW
+
+type: docker
+
+labels:
+  collection: Deploy Tools
+
+variables:
+  - name: ip_address
+    description: Host IP Address
+    default: 10.10.10.10
+    type_hint: ip_address
+
+  - name: username
+    description: Host Username
+    default: admin
+    type_hint: text
+
+  - name: password
+    description: Host Password
+    default: admin
+    type_hint: password
+
+snippets:
+  - name: ansible_test
+    image: registry.gitlab.com/panw-gse/as/panos_skillet_tools:latest
+    async: True
+    cmd: |
+      ansible-playbook -i 'panos,' perform_content_update.yml
+      -e '{"provider": {
+        "ip_address": "{{ ip_address }}",
+        "username": "{{ username }}",
+        "password":  "{{ password | quote }}"
+      } }'
