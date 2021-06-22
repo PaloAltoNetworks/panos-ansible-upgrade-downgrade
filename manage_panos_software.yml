@@ -52,7 +52,10 @@
           debug:
             msg: "Device is already in the desired state"
 
+
         - meta: end_play
+          name: Bailing Out
+
       when: (sw_version == desired_version) and (force_update_content != 'yes')
 
     - name: Setup Code Revisions Major List
@@ -177,6 +180,7 @@
         sw_version: "{{ system_info_json.response.result.system['sw-version'] }}"
       listen: reboot
 
-    - debug:
+    - name: Display Current Software version
+      debug:
         msg: "Current software version is: {{ sw_version }}"
       listen: reboot

@@ -1,22 +1,12 @@
-image: python:latest
-
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
-cache:
-  paths:
-    - .cache/pip
-    - venv/
-    - .tox/
+image: registry.gitlab.com/panw-gse/as/panos_skillet_tools:latest
 
 before_script:
   - python -V  # Print out python version for debugging
-  - pip install virtualenv
-  - virtualenv venv
-  - source venv/bin/activate
 
 test:
   script:
-    - pip install tox flake8
-    - tox -e py37,flake8
+    - cd roles/bootstrap_kvm/tests
+    - chmod 744 .
+    - ansible-playbook test.yml -i inventory --syntax-check
+    - ansible-lint test.yml -v
 
