@@ -5,8 +5,6 @@ before_script:
 
 test:
   script:
-    - cd roles/bootstrap_kvm/tests
-    - chmod 744 .
-    - ansible-playbook test.yml -i inventory --syntax-check
-    - ansible-lint test.yml -v
+    - ansible-playbook -i inventory.yml manage_panos_software.yml --syntax-check
+    - ansible-lint manage_panos_software.yml -v
 
