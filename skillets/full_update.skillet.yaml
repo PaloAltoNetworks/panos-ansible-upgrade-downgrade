@@ -1,7 +1,8 @@
 name: panos_ansible_upgrade_downgrade
-label: PAN-OS Upgrade / Downgrade
+label: PAN-OS Full Upgrade / Downgrade
 description: |
-  Playbook to dynamically upgrade / downgrade a PAN-OS to the desired version.
+  Playbook to upgrade/downgrade a PAN-OS NGFW to the desired version, optionally license a
+  NGFW with auth-code, and optionally update content.
 
 type: docker
 
@@ -69,7 +70,7 @@ snippets:
     image: registry.gitlab.com/panw-gse/as/panos_skillet_tools:latest 
     async: True
     cmd: |
-      ansible-playbook -i 'panos,' manage_panos_software.yml
+      ansible-playbook -i 'panos,' ../manage_panos_software.yml
       -e 'auth_code="{{ auth_code }}"'
       -e 'desired_version="{{ desired_version }}"'
       -e 'update_content="{{ update_content }}"'

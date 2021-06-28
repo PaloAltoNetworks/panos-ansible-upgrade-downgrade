@@ -6,8 +6,11 @@ password: 'Sup er_Sec ret'
 # Set your authcode here to ensure the FW is properly licensed before attempting content updates
 auth_code: IBADCODE
 
+# Set your Customer Support Portal Licensing API Key here to ensure the FW is properly deactivate licenses
+api_key: ENTERKEYHERE
+
 # desired software version
-desired_version: 9.1.7
+desired_version: 9.1.8
 
 # should attempt content update
 # note this will not happen when desired_major == current_major versions
@@ -20,6 +23,7 @@ update_av: 'no'
 
 # Versions
 # Updated 10-20-20 - You Should periodically update these from what is available and recommended
+# Updated 06-04-21 - Updated for 10.1.0 and update minor revs across the board
 code_revisions:
   '8.0.0': 8.0.20
   '8.1.0': 8.1.19

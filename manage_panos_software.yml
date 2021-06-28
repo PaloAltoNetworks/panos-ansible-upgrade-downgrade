@@ -19,9 +19,9 @@
     - name: Include User Variables
       include_vars: vars/main.yml
 
-    - name: "Initiating Upgrade / Downgrade Tool"
+    - name: "Initiating Full Upgrade / Downgrade Tool"
       debug:
-        msg: "Initiating Upgrade / Downgrade Tool Version: {{ pb_version }}"
+        msg: "Initiating Full Upgrade / Downgrade Tool Version: {{ pb_version }}"
 
     - name: Ensure deps are avabilable
       # Ensure we have all the right requirements installed in this environment
@@ -100,31 +100,8 @@
     - name: debug version_sequence
       debug: msg="VS is {{ version_sequence }}"
 
-    - block:
-        - name: Activate my authcode
-          # This firewall must be licensed to pull dynamic content and software updates
-          panos_lic:
-            provider: '{{ provider }}'
-            auth_code: '{{ auth_code }}'
-          register: activate_authcode
-
-        - name: Pause for Service Restart
-          pause:
-            seconds: 120
-          when: activate_authcode.changed
-          notify: "reboot"
-
-      rescue:
-        - name: Alert User on license Success
-          debug: msg="Successful license operation often results in an exception. This is expected behavior."
-
-        - name: Notify Reboot Handler
-          command: echo "Wait for Process Restart"
-          notify: "reboot"
-
-        - name: Pause for Restart Checks
-          pause:
-            seconds: 120
+    - name: Activate licenses using auth-code
+      include_tasks: tasks/activate_license.yml
 
     - name: Wait for Service Restart Handler
       meta: flush_handlers

@@ -1,0 +1,59 @@
+- hosts: all
+  connection: local
+  gather_facts: false
+
+  vars:
+    provider:
+      ip_address: '{{ ip_address }}'
+      username: '{{ username }}'
+      password: '{{ password }}'
+
+    pb_version: 1.2
+
+  collections:
+    - paloaltonetworks.panos
+
+  tasks:
+    - name: Include User Variables
+      include_vars: vars/main.yml
+
+    - name: "Initiating Content Update Tool"
+      debug:
+        msg: "Initiating Content Update Tool Version: {{ pb_version }}"
+
+    - name: Ensure deps are avabilable
+      # Ensure we have all the right requirements installed in this environment
+      pip:
+        name:
+          - pan-python
+          - pan-os-python>1.0.0
+          - xmltodict
+          - requests
+          - requests_toolbelt
+
+    - name: Wait for Device Online
+      # Best practice is to always wait for device online at start of playbook
+      # as these tasks will get called repeatedly, they are added as handlers that
+      # get included
+      command: echo "Waiting for device online"
+      notify: "reboot"
+
+    - name: Wait for Online Handler
+      meta: flush_handlers
+
+    - name: Install latest Dynamic Updates
+      include_tasks: tasks/content_updates.yml
+
+    - name: Install latest Anti-Virus Updates
+      include_tasks: tasks/antivirus_updates.yml
+
+  handlers:
+    - name: Wait for System Information
+      panos_op:
+        provider: '{{ provider }}'
+        cmd: 'show system info'
+      register: system_info
+      until: system_info is not failed
+      retries: 60
+      delay: 30
+      listen: reboot
