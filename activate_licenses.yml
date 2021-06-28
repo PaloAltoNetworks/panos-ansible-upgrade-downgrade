@@ -17,9 +17,9 @@
     - name: Include User Variables
       include_vars: vars/main.yml
 
-    - name: "Initiating Content Update Tool"
+    - name: "Initiating License Activation Tool"
       debug:
-        msg: "Initiating Content Update Tool Version: {{ pb_version }}"
+        msg: "Initiating License Activation Tool Version: {{ pb_version }}"
 
     - name: Ensure deps are avabilable
       # Ensure we have all the right requirements installed in this environment
@@ -41,11 +41,12 @@
     - name: Wait for Online Handler
       meta: flush_handlers
 
-    - name: Install latest Dynamic Updates
-      include_tasks: tasks/content_updates.yml
+    - name: Activate licenses
+      include_tasks: tasks/activate_license.yml
 
-    - name: Install latest Anti-Virus Updates
-      include_tasks: tasks/antivirus_updates.yml
+    - name: Wait for Online Handler
+      meta: flush_handlers
+
 
   handlers:
     - name: Wait for System Information
