@@ -1,10 +1,40 @@
-image: registry.gitlab.com/panw-gse/as/panos_skillet_tools:latest
+image: registry.gitlab.com/panw-gse/as/as-py-base-image:latest
+
+
+# pip_cache_dir changes pip's cache directory to be inside the project directory since we can
+# only cache local items
+#
+# Git_strategy is used to fetch the repo content; fetch is used to retrieve changes made after last job
+#
+# Git_submodule_strategy is used to control if/how Git submodules are included when fetching the code before a build
+# Git_submodule_strategy: recursive means that all submodules are included
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  GIT_STRATEGY: fetch
+  GIT_SUBMODULE_STRATEGY: recursive
+
+# Pip's cache doesn't store the python packages
+# https://pip.pypa.io/en/stable/reference/pip_install/#caching
+#
+# If you want to also cache the installed packages, you have to install
+# them in a virtualenv and cache it as well.
+cache:
+  paths:
+    - .cache/pip
+    - .venv/
 
 before_script:
   - python -V  # Print out python version for debugging
+  - pip install virtualenv # Install virtual environment
+  - virtualenv .venv # Create the venv
+  - source .venv/bin/activate # Activate the venv
 
-test:
+
+# Install and/or upgrade the SLI command line tool
+#
+# Run the sli load command to load and display all skillets with the -le flag to fail and output if loader errors
+skillet-test:
   script:
-    - ansible-playbook -i inventory.yml manage_panos_software.yml --syntax-check
-    - ansible-lint manage_panos_software.yml -v
-
+    - pip install --upgrade sli
+    - pip install --upgrade skilletlib
+    - sli load -le

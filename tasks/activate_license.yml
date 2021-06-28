@@ -1,0 +1,25 @@
+- block:
+    - name: Activate using the authcode
+      # This firewall must be licensed to pull dynamic content and software updates
+      paloaltonetworks.panos.panos_lic:
+        provider: '{{ provider }}'
+        auth_code: '{{ auth_code }}'
+      register: activate_authcode
+
+    - name: Pause for Service Restart
+      pause:
+        seconds: 120
+      when: activate_authcode.changed
+      notify: "reboot"
+
+  rescue:
+    - name: Alert User on license Success
+      debug: msg="Successful license operation often results in an exception. This is expected behavior."
+
+    - name: Notify Reboot Handler
+      command: echo "Wait for Process Restart"
+      notify: "reboot"
+
+    - name: Pause for Restart Checks
+      pause:
+        seconds: 120
