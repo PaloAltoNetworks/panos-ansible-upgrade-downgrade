@@ -1,0 +1,45 @@
+name: panos_ansible_deactivate_license
+label: PAN-OS Deactivate Licenses
+description: |
+  Playbook to dynamically deactivate all NGFW's license
+
+type: docker
+
+labels:
+  collection: Deploy Tools
+
+variables:
+  - name: ip_address
+    description: Host IP Address
+    default: 10.10.10.10
+    type_hint: ip_address
+
+  - name: username
+    description: Host Username
+    default: admin
+    type_hint: text
+
+  - name: password
+    description: Host Password
+    default: admin
+    type_hint: password
+
+  - name: api_key
+    description: Customer Support Portal Licensing API Key
+    default: ENTER_KEY_HER
+    type_hint: text
+    help_text: |
+      This can be found at https://support.paloaltonetworks.com/ under Assets > API Key Management > Licensing API.
+
+snippets:
+  - name: ansible_test
+    image: registry.gitlab.com/panw-gse/as/panos_skillet_tools:latest
+    async: True
+    cmd: |
+      ansible-playbook -i 'panos,' ../deactivate_licenses.yml
+      -e 'api_key="{{ api_key }}"'
+      -e '{"provider": {
+        "ip_address": "{{ ip_address }}",
+        "username": "{{ username }}",
+        "password":  "{{ password | quote }}"
+      } }'

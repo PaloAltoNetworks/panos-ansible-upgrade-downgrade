@@ -6,6 +6,9 @@ password: 'Sup er_Sec ret'
 # Set your authcode here to ensure the FW is properly licensed before attempting content updates
 auth_code: IBADCODE
 
+# Set your Customer Support Portal Licensing API Key here to ensure the FW is properly deactivate licenses
+api_key: ENTERKEYHERE
+
 # desired software version
 desired_version: 9.1.8
 

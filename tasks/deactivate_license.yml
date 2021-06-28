@@ -1,0 +1,51 @@
+- block:
+    - name: Check current license API key
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ provider }}'
+        cmd: '<request><license><api-key><show></show></api-key></license></request>'
+        cmd_is_xml: true
+      register: show_license_key
+
+    - name: Set current API key fact
+      set_fact:
+        current_key: "{{ (show_license_key.stdout | from_json).response.result.split(': ')[1] }}"
+
+    - name: View current license API key
+      debug:
+        msg: "{{ current_key }}"
+
+    - name: Set licensing API key
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ provider }}'
+        cmd: '<request><license><api-key><set><key>{{ api_key }}</key></set></api-key></license></request>'
+        cmd_is_xml: true
+      register: download
+      when: current_key != api_key
+
+  rescue:
+    - name: Set licensing API key
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ provider }}'
+        cmd: '<request><license><api-key><set><key>{{ api_key }}</key></set></api-key></license></request>'
+        cmd_is_xml: true
+      register: download
+
+- block:
+    - name: Run auto license deactivation
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ provider }}'
+        cmd: '<request><license><deactivate><VM-Capacity><mode>auto</mode></VM-Capacity></deactivate></license></request>'
+        cmd_is_xml: true
+      register: show_license_key
+
+  rescue:
+    - name: Alert User on license Success
+      debug: msg="Successful delicense operation often results in an exception. This is expected behavior."
+
+    - name: Notify Reboot Handler
+      command: echo "Wait for Process Restart"
+      notify: "reboot"
+
+    - name: Pause for Restart Checks
+      pause:
+        seconds: 60
