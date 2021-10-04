@@ -10,6 +10,14 @@ This playbook will:
 
 ### Usage with Ansible
 
+Install the [paloaltonetworks.panos](https://galaxy.ansible.com/paloaltonetworks/panos) Ansible collection first:
+
+```bash
+ansible-galaxy collection install paloaltonetworks.panos
+```
+
+* Note - This requires Ansible 2.9+
+
 Edit the defaults/main.yml file to set the following variables: 
 
 1. PAN-OS authentication information (`ip_address`, `username`, and `password`)
