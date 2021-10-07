@@ -26,8 +26,20 @@ Edit the defaults/main.yml file to set the following variables:
 You may also set the variables via CLI / Extra args. 
 
 ```bash
-  ansible-playbook -i inventory.yml ./manage_panos_software.yml -e 'desired_version=9.0.11' -e 'ip_address=10.10.10.131' -e 'username=admin' -e 'password=HI THERE!' ...
+  ansible-playbook -i inventory.yml ./manage_panos_software.yml -e 'desired_version=9.0.11' -e 'ip_address=10.10.10.131' -e 'username=admin' -e 'password=HI THERE!'
 ```
+
+#### Ansible Requirements
+
+These playbooks depend on the [paloaltonetworks.panos](https://galaxy.ansible.com/paloaltonetworks/panos)
+collection.
+
+```bash
+ansible-galaxy collection install paloaltonetworks.panos
+```
+
+See [here](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html#installing-collections-with-ansible-galaxy)
+for more information.
 
 ### Usage with Skillet Players
 

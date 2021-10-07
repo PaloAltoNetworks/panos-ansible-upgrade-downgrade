@@ -1,0 +1,146 @@
+---
+# manage_panos_ha_software.yml - PAN-OS HA pair upgrade / downgrade playbook.
+#
+# Description
+# ===========
+#
+# Upgrades a PAN-OS HA pair to the specified version.  Upgrade is attempted from any release to any release, upgrade
+# or downgrade.
+#
+# This playbook requires connection details for the primary member of the HA pair. The auth information
+# for the secondary member is assumed to be the same as the primary.
+#
+# Usage
+# =====
+#
+# Required variables:
+#
+#   username: username of the primary member
+#
+#   password: password of the primary member
+#
+#   ip_address: ip_address of the primary member
+#
+#   desired_version: Version to install.
+#
+# See the VARS section of the playbook for additional customization options.
+#
+# Default run:
+#
+#  $ ansible-playbook -i inventory manage_panos_ha_software.yml -e 'desired_version=9.0.11' -e 'ip_address=10.10.10.131' -e 'username=admin' -e 'password=HI THERE!'
+#
+# Notes
+# =====
+#
+# HA pairs with preemption enabled are not supported by this playbook.
+#
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    auth_code: 'your valid VM Auth-Code if unlicensed'
+    pb_version: 1.3
+
+  collections:
+    - paloaltonetworks.panos
+
+  tasks:
+    - name: Include User Variables
+      include_vars: vars/main.yml
+
+    - name: Set Primary Provider
+      set_fact:
+        primary:
+          ip_address: '{{ ip_address }}'
+          username: '{{ username }}'
+          password: '{{ password }}'
+
+    - name: Obtain High-Availability Status
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ primary }}'
+        cmd: 'show high-availability state'
+      register: secondary_peer
+
+    - name: Set Secondary Provider
+      set_fact:
+        secondary:
+          ip_address: '{{ (secondary_peer.stdout |
+            from_json).response.result.group["peer-info"]["mgmt-ip"].split("/")[0] }}'
+          username: '{{ username }}'
+          password: '{{ password }}'
+
+    - name: Suspend primary device
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ primary }}'
+        cmd: 'request high-availability state suspend'
+
+    - name: Check that secondary is now active
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ secondary }}'
+        cmd: 'show high-availability state'
+      register: secondary_active
+      retries: 20
+      delay: 30
+      until: ( secondary_active.stdout |
+                from_json).response.result.group["local-info"].state == 'active' and
+             ( secondary_active.stdout |
+                from_json).response.result.group["peer-info"].state == 'suspended' and
+             ( secondary_active.stdout |
+                from_json).response.result.group["peer-info"]["state-reason"] == 'User requested'
+
+- import_playbook: manage_panos_software.yml
+  vars:
+    provider: '{{ primary }}'
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: State sync check (primary)
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ primary }}'
+        cmd: 'show high-availability state'
+      register: primary_state_sync
+      retries: 20
+      delay: 30
+      until: '"state" in ( primary_state_sync.stdout | from_json).response.result.group["local-info"] and
+        ( primary_state_sync.stdout | from_json).response.result.group["local-info"].state == "passive" and
+        ( primary_state_sync.stdout | from_json).response.result.group["local-info"]["state-sync"] == "Complete"'
+
+    - name: Suspend secondary device
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ secondary }}'
+        cmd: 'request high-availability state suspend'
+
+    - name: Check that primary is now active
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ primary }}'
+        cmd: 'show high-availability state'
+      register: primary_active
+      retries: 20
+      delay: 30
+      until: ( primary_active.stdout | from_json).response.result.group["local-info"].state == 'active' and
+        'state' in ( primary_active.stdout | from_json).response.result.group["peer-info"] and
+        ( primary_active.stdout | from_json).response.result.group["peer-info"].state == 'suspended' and
+        ( primary_active.stdout | from_json).response.result.group["peer-info"]["state-reason"] == 'User requested'
+
+- import_playbook: manage_panos_software.yml
+  vars:
+    provider: '{{ secondary }}'
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: State sync check (secondary)
+      paloaltonetworks.panos.panos_op:
+        provider: '{{ secondary }}'
+        cmd: 'show high-availability state'
+      register: secondary_state_sync
+      retries: 20
+      delay: 30
+      until: '"state" in ( secondary_state_sync.stdout | from_json).response.result.group["local-info"] and
+        ( secondary_state_sync.stdout | from_json).response.result.group["local-info"].state == "passive" and
+        ( secondary_state_sync.stdout | from_json).response.result.group["local-info"]["state-sync"] == "Complete"'
