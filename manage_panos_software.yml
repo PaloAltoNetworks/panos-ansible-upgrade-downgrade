@@ -10,7 +10,7 @@
       username: '{{ username }}'
       password: '{{ password }}'
 
-    pb_version: 1.2
+    pb_version: 1.3
 
   collections:
     - paloaltonetworks.panos
@@ -22,6 +22,10 @@
     - name: "Initiating Full Upgrade / Downgrade Tool"
       debug:
         msg: "Initiating Full Upgrade / Downgrade Tool Version: {{ pb_version }}"
+
+    - name: "Show IP Address"
+      debug:
+        msg: "Operating on Device: {{ provider.ip_address }}"
 
     - name: Ensure deps are avabilable
       # Ensure we have all the right requirements installed in this environment
