@@ -41,7 +41,7 @@
 
   vars:
     auth_code: 'your valid VM Auth-Code if unlicensed'
-    pb_version: 1.3
+    pb_version: 1.4
 
   collections:
     - paloaltonetworks.panos
@@ -70,6 +70,7 @@
     - name: Update System Info
       set_fact:
         system_info_json: "{{ system_info.stdout | from_json }}"
+        upgrade_required: true
 
     - name: Update Software Version
       set_fact:
@@ -83,10 +84,12 @@
         - name: "Checking if we should bail out early"
           debug:
             msg: "Device is already in the desired state"
+        - name: "Set upgrade required fact"
+          set_fact:
+            upgrade_required: false
 
         - meta: end_play
           name: Bailing Out
-
       when: (sw_version == desired_version)
 
     - name: Obtain High-Availability Status
@@ -123,6 +126,7 @@
                 from_json).response.result.group["peer-info"]["state-reason"] == 'User requested'
 
 - import_playbook: manage_panos_software.yml
+  when: (upgrade_required is true)
   vars:
     provider: '{{ primary }}'
 
@@ -130,6 +134,10 @@
   connection: local
   gather_facts: false
   tasks:
+    - meta: end_play
+      name: Bailing Out
+      when: (upgrade_required is false)
+
     - name: State sync check (primary)
       paloaltonetworks.panos.panos_op:
         provider: '{{ primary }}'
@@ -159,6 +167,7 @@
         ( primary_active.stdout | from_json).response.result.group["peer-info"]["state-reason"] == 'User requested'
 
 - import_playbook: manage_panos_software.yml
+  when: (upgrade_required is true)
   vars:
     provider: '{{ secondary }}'
 
@@ -166,6 +175,10 @@
   connection: local
   gather_facts: false
   tasks:
+    - meta: end_play
+      name: Bailing Out
+      when: (upgrade_required is false)
+
     - name: State sync check (secondary)
       paloaltonetworks.panos.panos_op:
         provider: '{{ secondary }}'
@@ -176,3 +189,4 @@
       until: '"state" in ( secondary_state_sync.stdout | from_json).response.result.group["local-info"] and
         ( secondary_state_sync.stdout | from_json).response.result.group["local-info"].state == "passive" and
         ( secondary_state_sync.stdout | from_json).response.result.group["local-info"]["state-sync"] == "Complete"'
+      when: (upgrade_required is true)
