@@ -57,6 +57,38 @@
           username: '{{ username }}'
           password: '{{ password }}'
 
+    # always wait for device online
+    - name: Wait for System Information
+      panos_op:
+        provider: '{{ primary }}'
+        cmd: 'show system info'
+      register: system_info
+      until: system_info is not failed
+      retries: 60
+      delay: 30
+
+    - name: Update System Info
+      set_fact:
+        system_info_json: "{{ system_info.stdout | from_json }}"
+
+    - name: Update Software Version
+      set_fact:
+        sw_version: "{{ system_info_json.response.result.system['sw-version'] }}"
+
+    - name: "Debug Parameters"
+      debug:
+        msg: "Upgrade / Downgrade called with parameters: {{ sw_version }} -> {{ desired_version }}"
+
+    - block:
+        - name: "Checking if we should bail out early"
+          debug:
+            msg: "Device is already in the desired state"
+
+        - meta: end_play
+          name: Bailing Out
+
+      when: (sw_version == desired_version)
+
     - name: Obtain High-Availability Status
       paloaltonetworks.panos.panos_op:
         provider: '{{ primary }}'
