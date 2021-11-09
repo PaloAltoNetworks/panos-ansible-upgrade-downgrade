@@ -118,12 +118,12 @@
       register: secondary_active
       retries: 20
       delay: 30
-      until: ( secondary_active.stdout |
-                from_json).response.result.group["local-info"].state == 'active' and
+      until: '"active" in ( secondary_active.stdout |
+                from_json).response.result.group["local-info"].state and
              ( secondary_active.stdout |
-                from_json).response.result.group["peer-info"].state == 'suspended' and
+                from_json).response.result.group["peer-info"].state == "suspended" and
              ( secondary_active.stdout |
-                from_json).response.result.group["peer-info"]["state-reason"] == 'User requested'
+                from_json).response.result.group["peer-info"]["state-reason"] == "User requested"'
 
 - import_playbook: manage_panos_software.yml
   when: (upgrade_required is true)
@@ -146,7 +146,7 @@
       retries: 20
       delay: 30
       until: '"state" in ( primary_state_sync.stdout | from_json).response.result.group["local-info"] and
-        ( primary_state_sync.stdout | from_json).response.result.group["local-info"].state == "passive" and
+        ( primary_state_sync.stdout | from_json).response.result.group["local-info"].state != "suspended" and
         ( primary_state_sync.stdout | from_json).response.result.group["local-info"]["state-sync"] == "Complete"'
 
     - name: Suspend secondary device
@@ -161,10 +161,10 @@
       register: primary_active
       retries: 20
       delay: 30
-      until: ( primary_active.stdout | from_json).response.result.group["local-info"].state == 'active' and
-        'state' in ( primary_active.stdout | from_json).response.result.group["peer-info"] and
-        ( primary_active.stdout | from_json).response.result.group["peer-info"].state == 'suspended' and
-        ( primary_active.stdout | from_json).response.result.group["peer-info"]["state-reason"] == 'User requested'
+      until: '"active" in ( primary_active.stdout | from_json).response.result.group["local-info"].state and
+        "state" in ( primary_active.stdout | from_json).response.result.group["peer-info"] and
+        ( primary_active.stdout | from_json).response.result.group["peer-info"].state == "suspended" and
+        ( primary_active.stdout | from_json).response.result.group["peer-info"]["state-reason"] == "User requested"'
 
 - import_playbook: manage_panos_software.yml
   when: (upgrade_required is true)
@@ -187,6 +187,6 @@
       retries: 20
       delay: 30
       until: '"state" in ( secondary_state_sync.stdout | from_json).response.result.group["local-info"] and
-        ( secondary_state_sync.stdout | from_json).response.result.group["local-info"].state == "passive" and
+        ( secondary_state_sync.stdout | from_json).response.result.group["local-info"].state != "suspended" and
         ( secondary_state_sync.stdout | from_json).response.result.group["local-info"]["state-sync"] == "Complete"'
       when: (upgrade_required is true)
