@@ -1,4 +1,4 @@
-image: docker pull gsespc/as-py-base-image:latest
+image: docker.io/gsespc/as-py-base-image:latest
 
 
 # pip_cache_dir changes pip's cache directory to be inside the project directory since we can
