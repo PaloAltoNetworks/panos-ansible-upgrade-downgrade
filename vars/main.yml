@@ -1,7 +1,7 @@
 # PAN-OS Auth Information
-ip_address: 10.48.64.19
+ip_address: 10.10.10.10
 username: admin
-password: 'admin'
+password: 'Sup er_Sec ret'
 
 # Set your authcode here to ensure the FW is properly licensed before attempting content updates
 auth_code: IBADCODE
@@ -42,4 +42,3 @@ minimum_version:
   '5410': 10.2.0
   '5420': 10.2.0
   '5430': 10.2.0
-  
