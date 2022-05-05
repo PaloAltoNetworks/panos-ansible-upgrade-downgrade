@@ -22,16 +22,21 @@ force_update_content: 'no'
 update_av: 'no'
 
 # Versions
+# this should be updated with latest recommended / latest from here
+# https://live.paloaltonetworks.com/t5/customer-resources/support-pan-os-software-release-guidance/ta-p/258304
 # Updated 10-20-20 - You Should periodically update these from what is available and recommended
 # Updated 06-04-21 - Updated for 10.1.0 and update minor revs across the board
 # Updated 10-07-21 - Updated for 10.1.2 and update minor revs
+# updated 11-30-21 - Updated for 10.1.3 / 10.0.8 and update minor revs
+# updated 3-3-22 - updated for 10.2.0 and 10.0.9
 code_revisions:
   '8.0.0': 8.0.20
   '8.1.0': 8.1.20
-  '9.0.0': 9.0.14
-  '9.1.0': 9.1.11
-  '10.0.0': 10.0.7
-  '10.1.0': 10.1.2
+  '9.0.0': 9.0.16
+  '9.1.0': 9.1.13
+  '10.0.0': 10.0.9
+  '10.1.0': 10.1.3
+  '10.2.0': 10.2.0
 
 # Minimum platform version 
 minimum_version:
