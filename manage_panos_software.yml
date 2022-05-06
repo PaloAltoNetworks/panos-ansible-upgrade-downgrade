@@ -47,6 +47,10 @@
     - name: Wait for Online Handler
       meta: flush_handlers
 
+    - name: Ensure Minimum Version
+      fail: msg="Desired version {{ desired_version }} doesn't meet minimum required version {{ minimum_version.get(platform_model) }}"
+      when: (platform_model in minimum_version) and (desired_version is version(minimum_version.get(platform_model), '<'))
+
     - name: "Debug Parameters"
       debug:
         msg: "Upgrade / Downgrade called with parameters: {{ sw_version }} -> {{ desired_version }}"
@@ -159,6 +163,11 @@
     - name: Update Software Version
       set_fact:
         sw_version: "{{ system_info_json.response.result.system['sw-version'] }}"
+      listen: reboot
+
+    - name: Update Platform Family
+      set_fact:
+        platform_model: "{{ system_info_json.response.result.system['model'] }}"
       listen: reboot
 
     - name: Display Current Software version
