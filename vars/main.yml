@@ -29,14 +29,15 @@ update_av: 'no'
 # Updated 10-07-21 - Updated for 10.1.2 and update minor revs
 # updated 11-30-21 - Updated for 10.1.3 / 10.0.8 and update minor revs
 # updated 3-3-22 - updated for 10.2.0 and 10.0.9
+# updated 7-3-22 - added 10.2.2 and 10.1.6
 code_revisions:
   '8.0.0': 8.0.20
-  '8.1.0': 8.1.20
+  '8.1.0': 8.1.23
   '9.0.0': 9.0.16
-  '9.1.0': 9.1.13
-  '10.0.0': 10.0.9
-  '10.1.0': 10.1.3
-  '10.2.0': 10.2.0
+  '9.1.0': 9.1.14
+  '10.0.0': 10.0.11
+  '10.1.0': 10.1.6
+  '10.2.0': 10.2.2
 
 # Minimum platform version 
 minimum_version:
