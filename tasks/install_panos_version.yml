@@ -4,6 +4,7 @@
     version: '{{ major_version }}'
     install: false
     restart: false
+    perform_software_check: false
   when: current_major != major_version
 
 - name: Install PAN-OS Minor version and Reboot
@@ -12,6 +13,7 @@
     version: '{{ code_revisions.get(major_version) }}'
     install: true
     restart: true
+    perform_software_check: false
   register: install_result
 
 - name: Notify Reboot Handler
