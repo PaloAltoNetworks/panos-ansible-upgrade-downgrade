@@ -4,7 +4,6 @@
     version: '{{ major_version }}'
     install: false
     restart: false
-    perform_software_check: false
   when: current_major != major_version
 
 - name: Install PAN-OS Minor version and Reboot
