@@ -12,7 +12,6 @@
     version: '{{ code_revisions.get(major_version) }}'
     install: true
     restart: true
-    perform_software_check: false
   register: install_result
 
 - name: Notify Reboot Handler
